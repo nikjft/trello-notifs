@@ -29,6 +29,25 @@ export default function SettingsPanel({ settings, onSave, onClose }: Props) {
           </button>
         </div>
 
+        <div className="bg-gray-800/60 border border-gray-700 rounded-lg p-3 mb-4 text-sm space-y-1">
+          <p className="text-gray-300 font-medium">Getting your credentials:</p>
+          <ol className="text-gray-400 space-y-1 list-decimal list-inside">
+            <li>
+              Go to{' '}
+              <a
+                href="https://trello.com/app-key"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 underline"
+              >
+                trello.com/app-key
+              </a>
+            </li>
+            <li>Copy your <span className="text-gray-200">API Key</span> from that page</li>
+            <li>Click <span className="text-gray-200">"Generate a Token"</span> and copy the token</li>
+          </ol>
+        </div>
+
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label className="block text-gray-300 text-xs font-medium mb-1 uppercase tracking-wide">

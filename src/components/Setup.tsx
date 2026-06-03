@@ -24,18 +24,24 @@ export default function Setup({ onSave }: Props) {
           <h1 className="text-white text-lg font-semibold">Trello Notifications Setup</h1>
         </div>
 
-        <p className="text-gray-400 text-sm mb-6">
-          Enter your Trello API credentials. Get them at{' '}
-          <a
-            href="https://trello.com/app-key"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 hover:text-blue-300 underline"
-          >
-            trello.com/app-key
-          </a>
-          . Your API Key is shown there; for the Token click "Generate a Token" on that page.
-        </p>
+        <div className="bg-gray-800/60 border border-gray-700 rounded-lg p-4 mb-6 text-sm space-y-1.5">
+          <p className="text-gray-300 font-medium">To get your credentials:</p>
+          <ol className="text-gray-400 space-y-1 list-decimal list-inside">
+            <li>
+              Go to{' '}
+              <a
+                href="https://trello.com/app-key"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 underline"
+              >
+                trello.com/app-key
+              </a>
+            </li>
+            <li>Copy your <span className="text-gray-200">API Key</span> from that page</li>
+            <li>Click <span className="text-gray-200">"Generate a Token"</span> on the same page and copy the token</li>
+          </ol>
+        </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
