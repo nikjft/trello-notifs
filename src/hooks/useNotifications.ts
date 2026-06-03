@@ -27,14 +27,14 @@ export function useNotifications(settings: Settings, hasCredentials: boolean) {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchNotifications(settings.apiKey, settings.apiToken);
+      const data = await fetchNotifications(settings.apiKey, settings.apiToken, settings.lookback ?? 'unread');
       setNotifications(data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
-  }, [settings.apiKey, settings.apiToken, hasCredentials]);
+  }, [settings.apiKey, settings.apiToken, settings.lookback, hasCredentials]);
 
   useEffect(() => {
     if (hasCredentials) refresh();

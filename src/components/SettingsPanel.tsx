@@ -15,7 +15,7 @@ export default function SettingsPanel({ settings, onSave, onClose }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ apiKey: apiKey.trim(), apiToken: apiToken.trim(), username: username.trim() });
+    onSave({ ...settings, apiKey: apiKey.trim(), apiToken: apiToken.trim(), username: username.trim() });
     onClose();
   };
 

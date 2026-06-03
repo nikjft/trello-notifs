@@ -7,6 +7,7 @@ interface Props {
   stars: Set<string>;
   selectedCardId: string | null;
   viewedCards: Set<string>;
+  allViewed: boolean;
   boardFilter: BoardFilter | null;
   onSelect: (cardId: string) => void;
   onToggleStar: (cardId: string) => void;
@@ -25,6 +26,7 @@ export default function CardList({
   stars,
   selectedCardId,
   viewedCards,
+  allViewed,
   boardFilter,
   onSelect,
   onToggleStar,
@@ -77,7 +79,7 @@ export default function CardList({
         {cards.map(({ cardId, name, latest, types }) => {
           const isStarred = stars.has(cardId);
           const isSelected = selectedCardId === cardId;
-          const isViewed = viewedCards.has(cardId);
+          const isViewed = allViewed || viewedCards.has(cardId);
           return (
             <div
               key={cardId}

@@ -13,7 +13,7 @@ export default function Setup({ onSave }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ apiKey: apiKey.trim(), apiToken: apiToken.trim(), username: username.trim() });
+    onSave({ apiKey: apiKey.trim(), apiToken: apiToken.trim(), username: username.trim(), lookback: 'unread' });
   };
 
   return (

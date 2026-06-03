@@ -24,10 +24,13 @@ export type FilteredNotification = TrelloNotification & {
   type: 'addedToCard' | 'mentionedOnCard';
 };
 
+export type Lookback = 'unread' | '7d' | '14d' | '30d';
+
 export interface Settings {
   apiKey: string;
   apiToken: string;
   username: string;
+  lookback: Lookback;
 }
 
 export type BoardFilter = string | '__starred__';

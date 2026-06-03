@@ -4,10 +4,20 @@ const BASE = 'https://api.trello.com/1';
 
 export async function fetchNotifications(
   apiKey: string,
-  apiToken: string
+  apiToken: string,
+  lookback: import('./types').Lookback = 'unread'
 ): Promise<FilteredNotification[]> {
+  const days = lookback === '7d' ? 7 : lookback === '14d' ? 14 : lookback === '30d' ? 30 : null;
+  const since = days
+    ? new Date(Date.now() - days * 86400 * 1000).toISOString()
+    : null;
+
+  const params = since
+    ? `read_filter=all&limit=1000&since=${encodeURIComponent(since)}`
+    : `read_filter=unread&limit=200`;
+
   const [notifsRes, meRes] = await Promise.all([
-    fetch(`${BASE}/members/me/notifications?read_filter=unread&limit=200&key=${apiKey}&token=${apiToken}`),
+    fetch(`${BASE}/members/me/notifications?${params}&key=${apiKey}&token=${apiToken}`),
     fetch(`${BASE}/members/me?fields=id&key=${apiKey}&token=${apiToken}`),
   ]);
   if (!notifsRes.ok) throw new Error(`Trello API error: ${notifsRes.status} ${notifsRes.statusText}`);

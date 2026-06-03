@@ -7,7 +7,14 @@ import SettingsPanel from './components/SettingsPanel';
 import BoardList from './components/BoardList';
 import CardList from './components/CardList';
 import NotificationDetail from './components/NotificationDetail';
-import { BoardFilter, FilteredNotification } from './types';
+import { BoardFilter, FilteredNotification, Lookback } from './types';
+
+const LOOKBACK_OPTIONS: { value: Lookback; label: string }[] = [
+  { value: 'unread', label: 'Unread Only' },
+  { value: '7d',     label: '7 Days' },
+  { value: '14d',    label: '14 Days' },
+  { value: '30d',    label: '30 Days' },
+];
 
 export default function App() {
   const { settings, saveSettings, hasCredentials } = useSettings();
@@ -92,6 +99,15 @@ export default function App() {
               {error}
             </span>
           )}
+          <select
+            value={settings.lookback ?? 'unread'}
+            onChange={(e) => saveSettings({ ...settings, lookback: e.target.value as Lookback })}
+            className="bg-gray-900 border border-gray-700 text-gray-300 text-xs rounded px-2 py-1 focus:outline-none focus:border-blue-500 cursor-pointer"
+          >
+            {LOOKBACK_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
           <button
             onClick={refresh}
             disabled={loading}
@@ -134,6 +150,7 @@ export default function App() {
           stars={stars}
           selectedCardId={selectedCardId}
           viewedCards={viewedCards}
+          allViewed={settings.lookback !== 'unread'}
           boardFilter={boardFilter}
           onSelect={handleSelectCard}
           onToggleStar={toggleStar}

@@ -8,7 +8,7 @@ function loadSettings(): Settings {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw) as Settings;
   } catch {}
-  return { apiKey: '', apiToken: '', username: '' };
+  return { apiKey: '', apiToken: '', username: '', lookback: 'unread' as const };
 }
 
 export function useSettings() {
