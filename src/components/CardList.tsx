@@ -72,7 +72,7 @@ export default function CardList({
       {/* List */}
       <div className="flex-1 overflow-y-auto">
         {cards.length === 0 && (
-          <div className="px-3 py-4 text-gray-600 text-xs">No notifications</div>
+          <div className="px-3 py-4 text-gray-400 text-xs">No notifications</div>
         )}
         {cards.map(({ cardId, name, latest, types }) => {
           const isStarred = stars.has(cardId);
@@ -103,7 +103,7 @@ export default function CardList({
                   </span>
                   <button
                     onClick={(e) => { e.stopPropagation(); onToggleStar(cardId); }}
-                    className="flex-shrink-0 mt-0.5 text-gray-600 hover:text-yellow-400 transition-colors"
+                    className="flex-shrink-0 mt-0.5 text-gray-400 hover:text-yellow-400 transition-colors"
                   >
                     <Star
                       size={13}
@@ -119,7 +119,7 @@ export default function CardList({
                   {types.has('mentionedOnCard') && (
                     <span className="text-xs bg-purple-900/60 text-purple-300 px-1.5 py-0.5 rounded">Mentioned</span>
                   )}
-                  <span className="text-gray-600 text-xs">{formatDistanceToNow(latest.date)}</span>
+                  <span className="text-gray-400 text-xs">{formatDistanceToNow(latest.date)}</span>
                 </div>
               </div>
             </div>

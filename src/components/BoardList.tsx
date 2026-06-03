@@ -41,7 +41,7 @@ export default function BoardList({ boards, starredCount, selected, onSelect }: 
 
         {/* Boards */}
         {boards.length === 0 && starredCount === 0 && (
-          <div className="px-3 py-4 text-gray-600 text-xs">No unread notifications</div>
+          <div className="px-3 py-4 text-gray-400 text-xs">No unread notifications</div>
         )}
         {boards.map((b) => (
           <button

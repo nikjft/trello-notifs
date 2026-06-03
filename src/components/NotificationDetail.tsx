@@ -61,7 +61,7 @@ function ReplyBox({
       />
       {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
       <div className="flex items-center justify-between mt-2">
-        <span className="text-gray-600 text-xs">⌘↵ to send · Esc to cancel</span>
+        <span className="text-gray-400 text-xs">⌘↵ to send · Esc to cancel</span>
         <div className="flex items-center gap-2">
           <button onClick={onClose} className="text-gray-500 hover:text-gray-300 transition-colors">
             <X size={14} />
@@ -108,11 +108,11 @@ function NotificationItem({ notification, cardId, replyingTo, setReplyingTo, api
             )}
           </div>
           <div className="flex items-center gap-2">
-            <span title={formatDate(date)} className="text-gray-600 text-xs">{formatDistanceToNow(date)}</span>
+            <span title={formatDate(date)} className="text-gray-400 text-xs">{formatDistanceToNow(date)}</span>
             <button
               onClick={() => setReplyingTo(isReplying ? null : notification.id)}
               title="Reply"
-              className="text-gray-600 hover:text-gray-300 transition-colors"
+              className="text-gray-400 hover:text-gray-300 transition-colors"
             >
               <CornerDownLeft size={13} />
             </button>
@@ -143,7 +143,7 @@ export default function NotificationDetail({ notifications, cardId, isStarred, o
   // Reset reply box when card changes
   if (!cardId || notifications.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-700 text-sm">
+      <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">
         Select a notification
       </div>
     );
@@ -177,20 +177,20 @@ export default function NotificationDetail({ notifications, cardId, isStarred, o
         {/* Meta row */}
         <div className="flex flex-wrap gap-x-4 gap-y-1.5 mb-5 text-sm text-gray-400">
           {data.board?.name && (
-            <span><span className="text-gray-600">Board</span> {data.board.name}</span>
+            <span><span className="text-gray-400">Board</span> {data.board.name}</span>
           )}
           {listName && (
-            <span><span className="text-gray-600">List</span> {listName}</span>
+            <span><span className="text-gray-400">List</span> {listName}</span>
           )}
           {detailLoading ? (
-            <span className="flex items-center gap-1 text-gray-600 text-xs">
+            <span className="flex items-center gap-1 text-gray-400 text-xs">
               <Loader2 size={11} className="animate-spin" /> Loading…
             </span>
           ) : detail ? (
             detail.dueComplete ? (
               <span className="flex items-center gap-1.5 text-green-400 text-xs"><CheckSquare size={13} /> Done</span>
             ) : (
-              <span className="flex items-center gap-1.5 text-gray-600 text-xs"><Square size={13} /> Not done</span>
+              <span className="flex items-center gap-1.5 text-gray-400 text-xs"><Square size={13} /> Not done</span>
             )
           ) : null}
         </div>
@@ -237,7 +237,7 @@ export default function NotificationDetail({ notifications, cardId, isStarred, o
           <div className="mb-8">
             <button
               onClick={() => setDescExpanded((v) => !v)}
-              className="flex items-center gap-1.5 text-xs text-gray-600 uppercase tracking-wider hover:text-gray-400 transition-colors w-full text-left mb-2"
+              className="flex items-center gap-1.5 text-xs text-gray-400 uppercase tracking-wider hover:text-gray-400 transition-colors w-full text-left mb-2"
             >
               <ChevronRight size={12} className={`transition-transform ${descExpanded ? 'rotate-90' : ''}`} />
               <FileText size={12} />
@@ -254,7 +254,7 @@ export default function NotificationDetail({ notifications, cardId, isStarred, o
         {/* Comments */}
         {!detailLoading && detail && detail.comments.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 mb-3 text-xs text-gray-600 uppercase tracking-wider">
+            <div className="flex items-center gap-2 mb-3 text-xs text-gray-400 uppercase tracking-wider">
               <MessageSquare size={12} />
               <span>Recent comments ({detail.comments.length})</span>
             </div>
@@ -265,19 +265,19 @@ export default function NotificationDetail({ notifications, cardId, isStarred, o
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-gray-300 text-xs font-medium">{comment.author}</span>
                       <div className="flex items-center gap-2">
-                        <span title={formatDate(comment.date)} className="text-gray-600 text-xs">
+                        <span title={formatDate(comment.date)} className="text-gray-400 text-xs">
                           {formatDistanceToNow(comment.date)}
                         </span>
                         <button
                           onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
                           title="Reply"
-                          className="text-gray-600 hover:text-gray-300 transition-colors"
+                          className="text-gray-400 hover:text-gray-300 transition-colors"
                         >
                           <CornerDownLeft size={13} />
                         </button>
                       </div>
                     </div>
-                    <MarkdownBody text={comment.text} className="text-gray-400" />
+                    <MarkdownBody text={comment.text} className="text-gray-300" />
                   </div>
                   {replyingTo === comment.id && cardId && (
                     <ReplyBox
@@ -299,7 +299,7 @@ export default function NotificationDetail({ notifications, cardId, isStarred, o
           <div className="mt-6">
             <button
               onClick={() => setReplyingTo(replyingTo === 'card' ? null : 'card')}
-              className="flex items-center gap-1.5 text-gray-600 hover:text-gray-300 text-xs transition-colors"
+              className="flex items-center gap-1.5 text-gray-400 hover:text-gray-300 text-xs transition-colors"
             >
               <CornerDownLeft size={13} />
               Add comment
