@@ -3,12 +3,12 @@ import remarkGfm from 'remark-gfm';
 
 export function MarkdownBody({ text, className = '' }: { text: string; className?: string }) {
   return (
-    <div className={`prose prose-sm prose-invert max-w-none ${className}`}>
+    <div className={`prose prose-sm prose-invert max-w-none min-w-0 break-words ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
           a: ({ href, children }) => (
-            <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+            <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline break-all">
               {children}
             </a>
           ),
