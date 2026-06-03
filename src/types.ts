@@ -1,6 +1,13 @@
+export interface TrelloMember {
+  id: string;
+  username: string;
+  fullName: string;
+}
+
 export interface TrelloNotification {
   id: string;
   idMemberCreator: string;
+  memberCreator?: TrelloMember;
   type: 'addedToCard' | 'mentionedOnCard' | string;
   date: string;
   unread: boolean;

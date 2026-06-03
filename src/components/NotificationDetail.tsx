@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExternalLink, Archive, Star, Loader2, CheckSquare, Square, MessageSquare, FileText, CornerDownLeft, Send, X } from 'lucide-react';
+import { ExternalLink, Archive, Star, Loader2, CheckSquare, Square, MessageSquare, FileText, CornerDownLeft, Send, X, ChevronRight } from 'lucide-react';
 import { FilteredNotification, Settings } from '../types';
 import { formatDistanceToNow, formatDate } from '../utils';
 import { useCardDetail } from '../hooks/useCardDetail';
@@ -88,21 +88,25 @@ function NotificationItem({ notification, cardId, replyingTo, setReplyingTo, api
   apiKey: string;
   apiToken: string;
 }) {
-  const { data, type, date } = notification;
-  const replyUsername = data.member?.username ?? '';
+  const { data, type, date, memberCreator } = notification;
+  const actor = memberCreator;
+  const replyUsername = actor?.username ?? '';
   const isReplying = replyingTo === notification.id;
 
   return (
     <div>
       <div className="bg-gray-900 border border-gray-800 rounded-lg p-3">
         <div className="flex items-center justify-between gap-3 mb-1.5">
-          <span>
+          <div className="flex items-center gap-2">
             {type === 'addedToCard' ? (
               <span className="bg-green-900/60 text-green-300 text-xs px-1.5 py-0.5 rounded">Assigned</span>
             ) : (
               <span className="bg-purple-900/60 text-purple-300 text-xs px-1.5 py-0.5 rounded">Mentioned</span>
             )}
-          </span>
+            {actor && (
+              <span className="text-gray-400 text-xs">by <span className="text-gray-200">{actor.fullName || actor.username}</span></span>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <span title={formatDate(date)} className="text-gray-600 text-xs">{formatDistanceToNow(date)}</span>
             <button
@@ -116,11 +120,6 @@ function NotificationItem({ notification, cardId, replyingTo, setReplyingTo, api
         </div>
         {type === 'mentionedOnCard' && data.text && (
           <MarkdownBody text={data.text} className="mt-1 text-gray-300" />
-        )}
-        {type === 'addedToCard' && data.member && (
-          <p className="text-gray-400 text-sm">
-            Assigned by <span className="text-gray-200">{data.member.fullName || data.member.username}</span>
-          </p>
         )}
       </div>
       {isReplying && (
@@ -138,7 +137,8 @@ function NotificationItem({ notification, cardId, replyingTo, setReplyingTo, api
 
 export default function NotificationDetail({ notifications, cardId, isStarred, onMarkCardRead, onToggleStar, settings }: Props) {
   const { detail, loading: detailLoading } = useCardDetail(cardId, settings);
-  const [replyingTo, setReplyingTo] = useState<string | null>(null); // comment id or 'card'
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   // Reset reply box when card changes
   if (!cardId || notifications.length === 0) {
@@ -235,13 +235,19 @@ export default function NotificationDetail({ notifications, cardId, isStarred, o
         {/* Card description */}
         {!detailLoading && detail?.desc && (
           <div className="mb-8">
-            <div className="flex items-center gap-2 mb-2 text-xs text-gray-600 uppercase tracking-wider">
+            <button
+              onClick={() => setDescExpanded((v) => !v)}
+              className="flex items-center gap-1.5 text-xs text-gray-600 uppercase tracking-wider hover:text-gray-400 transition-colors w-full text-left mb-2"
+            >
+              <ChevronRight size={12} className={`transition-transform ${descExpanded ? 'rotate-90' : ''}`} />
               <FileText size={12} />
               <span>Description</span>
-            </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-              <MarkdownBody text={detail.desc} className="text-gray-300" />
-            </div>
+            </button>
+            {descExpanded && (
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                <MarkdownBody text={detail.desc} className="text-gray-300" />
+              </div>
+            )}
           </div>
         )}
 
