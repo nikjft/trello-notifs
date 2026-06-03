@@ -8,13 +8,8 @@ export async function fetchNotifications(
   lookback: import('./types').Lookback = 'unread'
 ): Promise<FilteredNotification[]> {
   const days = lookback === '7d' ? 7 : lookback === '14d' ? 14 : lookback === '30d' ? 30 : null;
-  const since = days
-    ? new Date(Date.now() - days * 86400 * 1000).toISOString()
-    : null;
-
-  const params = since
-    ? `read_filter=all&limit=1000&since=${encodeURIComponent(since)}`
-    : `read_filter=unread&limit=200`;
+  const cutoff = days ? new Date(Date.now() - days * 86400 * 1000) : null;
+  const params = cutoff ? `read_filter=all&limit=1000` : `read_filter=unread&limit=200`;
 
   const [notifsRes, meRes] = await Promise.all([
     fetch(`${BASE}/members/me/notifications?${params}&key=${apiKey}&token=${apiToken}`),
@@ -27,7 +22,8 @@ export async function fetchNotifications(
   return data.filter(
     (n): n is FilteredNotification =>
       (n.type === 'addedToCard' || n.type === 'mentionedOnCard') &&
-      n.idMemberCreator !== myId
+      n.idMemberCreator !== myId &&
+      (!cutoff || new Date(n.date) >= cutoff)
   );
 }
 
