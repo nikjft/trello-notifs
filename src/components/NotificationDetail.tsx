@@ -80,27 +80,57 @@ function ReplyBox({
   );
 }
 
-function NotificationItem({ notification }: { notification: FilteredNotification }) {
+function NotificationItem({ notification, cardId, replyingTo, setReplyingTo, apiKey, apiToken }: {
+  notification: FilteredNotification;
+  cardId: string;
+  replyingTo: string | null;
+  setReplyingTo: (id: string | null) => void;
+  apiKey: string;
+  apiToken: string;
+}) {
   const { data, type, date } = notification;
+  const replyUsername = data.member?.username ?? '';
+  const isReplying = replyingTo === notification.id;
+
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-lg p-3">
-      <div className="flex items-center justify-between gap-3 mb-1.5">
-        <span>
-          {type === 'addedToCard' ? (
-            <span className="bg-green-900/60 text-green-300 text-xs px-1.5 py-0.5 rounded">Assigned</span>
-          ) : (
-            <span className="bg-purple-900/60 text-purple-300 text-xs px-1.5 py-0.5 rounded">Mentioned</span>
-          )}
-        </span>
-        <span title={formatDate(date)} className="text-gray-600 text-xs">{formatDistanceToNow(date)}</span>
+    <div>
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-3">
+        <div className="flex items-center justify-between gap-3 mb-1.5">
+          <span>
+            {type === 'addedToCard' ? (
+              <span className="bg-green-900/60 text-green-300 text-xs px-1.5 py-0.5 rounded">Assigned</span>
+            ) : (
+              <span className="bg-purple-900/60 text-purple-300 text-xs px-1.5 py-0.5 rounded">Mentioned</span>
+            )}
+          </span>
+          <div className="flex items-center gap-2">
+            <span title={formatDate(date)} className="text-gray-600 text-xs">{formatDistanceToNow(date)}</span>
+            <button
+              onClick={() => setReplyingTo(isReplying ? null : notification.id)}
+              title="Reply"
+              className="text-gray-600 hover:text-gray-300 transition-colors"
+            >
+              <CornerDownLeft size={13} />
+            </button>
+          </div>
+        </div>
+        {type === 'mentionedOnCard' && data.text && (
+          <MarkdownBody text={data.text} className="mt-1 text-gray-300" />
+        )}
+        {type === 'addedToCard' && data.member && (
+          <p className="text-gray-400 text-sm">
+            Assigned by <span className="text-gray-200">{data.member.fullName || data.member.username}</span>
+          </p>
+        )}
       </div>
-      {type === 'mentionedOnCard' && data.text && (
-        <MarkdownBody text={data.text} className="mt-1 text-gray-300" />
-      )}
-      {type === 'addedToCard' && data.member && (
-        <p className="text-gray-400 text-sm">
-          Assigned by <span className="text-gray-200">{data.member.fullName || data.member.username}</span>
-        </p>
+      {isReplying && (
+        <ReplyBox
+          initialText={replyUsername ? `@${replyUsername} ` : ''}
+          cardId={cardId}
+          apiKey={apiKey}
+          apiToken={apiToken}
+          onClose={() => setReplyingTo(null)}
+        />
       )}
     </div>
   );
@@ -168,7 +198,15 @@ export default function NotificationDetail({ notifications, cardId, isStarred, o
         {/* Unread notifications for this card */}
         <div className="space-y-2 mb-4">
           {notifications.map((n) => (
-            <NotificationItem key={n.id} notification={n} />
+            <NotificationItem
+              key={n.id}
+              notification={n}
+              cardId={cardId}
+              replyingTo={replyingTo}
+              setReplyingTo={setReplyingTo}
+              apiKey={settings.apiKey}
+              apiToken={settings.apiToken}
+            />
           ))}
         </div>
 
