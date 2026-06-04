@@ -96,23 +96,36 @@ export function useNotifications(settings: Settings, hasCredentials: boolean) {
   }, [refresh, hasCredentials]);
 
   const toggleStar = useCallback((cardId: string, notification?: FilteredNotification) => {
-    setStars(prev => {
-      const next = new Set(prev);
-      setStarredData(prevData => {
-        const nextData = new Map(prevData);
-        if (next.has(cardId)) {
-          next.delete(cardId);
-          nextData.delete(cardId);
-        } else {
-          next.add(cardId);
-          if (notification) nextData.set(cardId, notification);
-        }
-        saveStarredData(nextData);
-        return nextData;
+    // Use ref to read current stars without a closure dependency
+    const currentlyStarred = starsRef.current.has(cardId);
+
+    if (currentlyStarred) {
+      setStars(prev => {
+        const next = new Set(prev);
+        next.delete(cardId);
+        saveStars(next);
+        return next;
       });
-      saveStars(next);
-      return next;
-    });
+      setStarredData(prev => {
+        const next = new Map(prev);
+        next.delete(cardId);
+        saveStarredData(next);
+        return next;
+      });
+    } else {
+      setStars(prev => {
+        const next = new Set(prev);
+        next.add(cardId);
+        saveStars(next);
+        return next;
+      });
+      setStarredData(prev => {
+        const next = new Map(prev);
+        if (notification) next.set(cardId, notification);
+        saveStarredData(next);
+        return next;
+      });
+    }
   }, []);
 
   const markRead = useCallback(
