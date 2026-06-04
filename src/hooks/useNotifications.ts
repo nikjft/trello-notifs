@@ -31,7 +31,10 @@ function sortByDate(list: FilteredNotification[]): FilteredNotification[] {
   return [...list].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
-function mergeNotifications(prev: FilteredNotification[], fresh: FilteredNotification[]): FilteredNotification[] {
+function mergeNotifications(
+  prev: FilteredNotification[],
+  fresh: FilteredNotification[]
+): FilteredNotification[] {
   const map = new Map(prev.map(n => [n.id, n]));
   for (const n of fresh) map.set(n.id, n);
   return sortByDate(Array.from(map.values()));
@@ -44,11 +47,13 @@ export function useNotifications(settings: Settings, hasCredentials: boolean) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Track previous lookback to detect mode changes
-  const prevLookbackRef = useRef(settings.lookback);
-  // Always-fresh ref to stars so refresh closure can read current value
+  // Refs so callbacks always see current values without stale closures
   const starsRef = useRef(stars);
+  const starredDataRef = useRef(starredData);
+  const prevLookbackRef = useRef(settings.lookback);
+
   useEffect(() => { starsRef.current = stars; }, [stars]);
+  useEffect(() => { starredDataRef.current = starredData; }, [starredData]);
 
   const refresh = useCallback(async () => {
     if (!hasCredentials) return;
@@ -59,31 +64,36 @@ export function useNotifications(settings: Settings, hasCredentials: boolean) {
     setLoading(true);
     setError(null);
     try {
-      const fresh = await fetchNotifications(settings.apiKey, settings.apiToken, settings.lookback ?? 'unread');
-      const currentStars = starsRef.current;
+      const fresh = await fetchNotifications(
+        settings.apiKey,
+        settings.apiToken,
+        settings.lookback ?? 'unread'
+      );
 
-      // Mode changed → full replace. Same mode → merge (keep viewed items in view).
+      // Mode changed → replace. Same mode → merge.
       if (lookbackChanged) {
         setNotifications(sortByDate(fresh));
       } else {
         setNotifications(prev => mergeNotifications(prev, fresh));
       }
 
-      // Populate starredData for any starred card found in fresh results
-      // (covers migration: cards starred before starredData existed)
-      setStarredData(prev => {
-        const next = new Map(prev);
-        let changed = false;
-        for (const n of fresh) {
-          const cardId = n.data.card?.id;
-          if (cardId && currentStars.has(cardId)) {
-            next.set(cardId, n);
-            changed = true;
-          }
+      // Populate starredData for starred cards found in fresh results.
+      // Compute outside an updater, save synchronously, then set state.
+      const currentStars = starsRef.current;
+      const currentData = starredDataRef.current;
+      let changed = false;
+      const nextData = new Map(currentData);
+      for (const n of fresh) {
+        const cardId = n.data.card?.id;
+        if (cardId && currentStars.has(cardId)) {
+          nextData.set(cardId, n);
+          changed = true;
         }
-        if (changed) saveStarredData(next);
-        return changed ? next : prev;
-      });
+      }
+      if (changed) {
+        saveStarredData(nextData);
+        setStarredData(nextData);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unknown error');
     } finally {
@@ -96,36 +106,26 @@ export function useNotifications(settings: Settings, hasCredentials: boolean) {
   }, [refresh, hasCredentials]);
 
   const toggleStar = useCallback((cardId: string, notification?: FilteredNotification) => {
-    // Use ref to read current stars without a closure dependency
+    // Read current values from refs — no stale closure, no state updater side effects
     const currentlyStarred = starsRef.current.has(cardId);
+    const newStars = new Set(starsRef.current);
+    const newData = new Map(starredDataRef.current);
 
     if (currentlyStarred) {
-      setStars(prev => {
-        const next = new Set(prev);
-        next.delete(cardId);
-        saveStars(next);
-        return next;
-      });
-      setStarredData(prev => {
-        const next = new Map(prev);
-        next.delete(cardId);
-        saveStarredData(next);
-        return next;
-      });
+      newStars.delete(cardId);
+      newData.delete(cardId);
     } else {
-      setStars(prev => {
-        const next = new Set(prev);
-        next.add(cardId);
-        saveStars(next);
-        return next;
-      });
-      setStarredData(prev => {
-        const next = new Map(prev);
-        if (notification) next.set(cardId, notification);
-        saveStarredData(next);
-        return next;
-      });
+      newStars.add(cardId);
+      if (notification) newData.set(cardId, notification);
     }
+
+    // Save to localStorage synchronously before any React re-render
+    saveStars(newStars);
+    saveStarredData(newData);
+
+    // Update React state (no updater functions — values already computed)
+    setStars(newStars);
+    setStarredData(newData);
   }, []);
 
   const markRead = useCallback(
@@ -138,7 +138,9 @@ export function useNotifications(settings: Settings, hasCredentials: boolean) {
 
   const markBoardRead = useCallback(
     async (boardId: string) => {
-      const ids = notifications.filter(n => n.data.board?.id === boardId).map(n => n.id);
+      const ids = notifications
+        .filter(n => n.data.board?.id === boardId)
+        .map(n => n.id);
       await markAllBoardNotificationsRead(ids, settings.apiKey, settings.apiToken);
       setNotifications(prev => prev.filter(n => n.data.board?.id !== boardId));
     },
