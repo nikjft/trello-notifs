@@ -21,6 +21,7 @@ export default function App() {
   const {
     notifications,
     stars,
+    starredData,
     loading,
     error,
     refresh,
@@ -38,27 +39,45 @@ export default function App() {
 
   const handleSelectCard = (cardId: string) => {
     setSelectedCardId(cardId);
-    setViewedCards((prev) => new Set(prev).add(cardId));
+    setViewedCards(prev => new Set(prev).add(cardId));
   };
 
   if (!hasCredentials) {
     return <Setup onSave={saveSettings} />;
   }
 
-  // Filter notifications for pane 2
+  // Build pane 2 notifications
   let pane2Notifications: FilteredNotification[];
   if (boardFilter === '__starred__') {
-    pane2Notifications = notifications.filter((n) => stars.has(n.data.card?.id ?? ''));
+    // Show live notifications for starred cards + stored data for archived starred cards
+    const liveStarred = notifications.filter(n => stars.has(n.data.card?.id ?? ''));
+    const liveStarredCardIds = new Set(liveStarred.map(n => n.data.card!.id));
+    const archivedStarred = [...stars]
+      .filter(cardId => !liveStarredCardIds.has(cardId))
+      .map(cardId => starredData.get(cardId))
+      .filter((n): n is FilteredNotification => n !== undefined);
+    pane2Notifications = [...liveStarred, ...archivedStarred];
   } else if (boardFilter) {
-    pane2Notifications = notifications.filter((n) => n.data.board?.id === boardFilter);
+    pane2Notifications = notifications.filter(n => n.data.board?.id === boardFilter);
   } else {
     pane2Notifications = notifications;
   }
 
-  // All notifications for the selected card
-  const cardNotifications = selectedCardId
-    ? notifications.filter((n) => n.data.card?.id === selectedCardId)
+  // All notifications for the selected card (fall back to starredData if archived)
+  const liveCardNotifs = selectedCardId
+    ? notifications.filter(n => n.data.card?.id === selectedCardId)
     : [];
+  const cardNotifications: FilteredNotification[] =
+    liveCardNotifs.length > 0
+      ? liveCardNotifs
+      : selectedCardId && starredData.has(selectedCardId)
+        ? [starredData.get(selectedCardId)!]
+        : [];
+
+  // Archived starred cards have no live board entry — mark them all as viewed
+  const isSelectedArchived = selectedCardId
+    ? liveCardNotifs.length === 0 && starredData.has(selectedCardId)
+    : false;
 
   const boards = Object.entries(boardCounts).map(([id, { name, count }]) => ({
     id,
@@ -66,10 +85,16 @@ export default function App() {
     count,
   }));
 
+  const handleToggleStar = (cardId: string) => {
+    const notif = notifications.find(n => n.data.card?.id === cardId)
+      ?? starredData.get(cardId);
+    toggleStar(cardId, notif);
+  };
+
   const handleMarkCardRead = async (ids: string[]) => {
     await Promise.all(ids.map(markRead));
     if (selectedCardId) {
-      setViewedCards((prev) => { const next = new Set(prev); next.delete(selectedCardId); return next; });
+      setViewedCards(prev => { const next = new Set(prev); next.delete(selectedCardId); return next; });
     }
     setSelectedCardId(null);
   };
@@ -104,7 +129,7 @@ export default function App() {
             onChange={(e) => saveSettings({ ...settings, lookback: e.target.value as Lookback })}
             className="bg-gray-900 border border-gray-700 text-gray-300 text-xs rounded px-2 py-1 focus:outline-none focus:border-blue-500 cursor-pointer"
           >
-            {LOOKBACK_OPTIONS.map((o) => (
+            {LOOKBACK_OPTIONS.map(o => (
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
@@ -140,28 +165,26 @@ export default function App() {
           boards={boards}
           starredCount={starredCount}
           selected={boardFilter}
-          onSelect={(f) => {
-            setBoardFilter(f);
-            setSelectedCardId(null);
-          }}
+          onSelect={f => { setBoardFilter(f); setSelectedCardId(null); }}
         />
         <CardList
           notifications={pane2Notifications}
           stars={stars}
           selectedCardId={selectedCardId}
           viewedCards={viewedCards}
-          allViewed={settings.lookback !== 'unread'}
+          allViewed={settings.lookback !== 'unread' || boardFilter === '__starred__'}
           boardFilter={boardFilter}
           onSelect={handleSelectCard}
-          onToggleStar={toggleStar}
+          onToggleStar={handleToggleStar}
           onMarkBoardRead={handleMarkBoardRead}
         />
         <NotificationDetail
           notifications={cardNotifications}
           cardId={selectedCardId}
           isStarred={selectedCardId ? stars.has(selectedCardId) : false}
+          isArchived={isSelectedArchived}
           onMarkCardRead={handleMarkCardRead}
-          onToggleStar={toggleStar}
+          onToggleStar={handleToggleStar}
           settings={settings}
         />
       </div>

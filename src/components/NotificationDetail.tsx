@@ -10,6 +10,7 @@ interface Props {
   notifications: FilteredNotification[];
   cardId: string | null;
   isStarred: boolean;
+  isArchived: boolean;
   onMarkCardRead: (ids: string[]) => void;
   onToggleStar: (cardId: string) => void;
   settings: Settings;
@@ -135,7 +136,7 @@ function NotificationItem({ notification, cardId, replyingTo, setReplyingTo, api
   );
 }
 
-export default function NotificationDetail({ notifications, cardId, isStarred, onMarkCardRead, onToggleStar, settings }: Props) {
+export default function NotificationDetail({ notifications, cardId, isStarred, isArchived, onMarkCardRead, onToggleStar, settings }: Props) {
   const { detail, loading: detailLoading } = useCardDetail(cardId, settings);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [descExpanded, setDescExpanded] = useState(false);
@@ -212,13 +213,15 @@ export default function NotificationDetail({ notifications, cardId, isStarred, o
 
         {/* Mark all read + open link */}
         <div className="flex items-center gap-3 mb-8">
-          <button
-            onClick={() => onMarkCardRead(notifIds)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded px-4 py-2 text-sm font-medium transition-colors"
-          >
-            <Archive size={15} />
-            Archive{notifications.length > 1 ? ` (${notifications.length})` : ''}
-          </button>
+          {!isArchived && (
+            <button
+              onClick={() => onMarkCardRead(notifIds)}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded px-4 py-2 text-sm font-medium transition-colors"
+            >
+              <Archive size={15} />
+              Archive{notifications.length > 1 ? ` (${notifications.length})` : ''}
+            </button>
+          )}
           {cardUrl && (
             <a
               href={cardUrl}
