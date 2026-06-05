@@ -21,7 +21,7 @@ export interface TrelloNotification {
 }
 
 export type FilteredNotification = TrelloNotification & {
-  type: 'addedToCard' | 'mentionedOnCard';
+  type: 'addedToCard' | 'mentionedOnCard' | 'commentCard';
 };
 
 export type Lookback = 'unread' | '7d' | '14d' | '30d';

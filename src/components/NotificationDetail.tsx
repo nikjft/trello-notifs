@@ -101,8 +101,10 @@ function NotificationItem({ notification, cardId, replyingTo, setReplyingTo, api
           <div className="flex items-center gap-2">
             {type === 'addedToCard' ? (
               <span className="bg-green-900/60 text-green-300 text-xs px-1.5 py-0.5 rounded">Assigned</span>
-            ) : (
+            ) : type === 'mentionedOnCard' ? (
               <span className="bg-purple-900/60 text-purple-300 text-xs px-1.5 py-0.5 rounded">Mentioned</span>
+            ) : (
+              <span className="bg-blue-900/60 text-blue-300 text-xs px-1.5 py-0.5 rounded">Comment</span>
             )}
             {actor && (
               <span className="text-gray-400 text-xs">by <span className="text-gray-200">{actor.fullName || actor.username}</span></span>
@@ -119,7 +121,7 @@ function NotificationItem({ notification, cardId, replyingTo, setReplyingTo, api
             </button>
           </div>
         </div>
-        {type === 'mentionedOnCard' && data.text && (
+        {(type === 'mentionedOnCard' || type === 'commentCard') && data.text && (
           <MarkdownBody text={data.text} className="mt-1 text-gray-300" />
         )}
       </div>

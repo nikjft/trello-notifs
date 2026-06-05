@@ -21,7 +21,7 @@ export async function fetchNotifications(
 
   return data.filter(
     (n): n is FilteredNotification =>
-      (n.type === 'addedToCard' || n.type === 'mentionedOnCard') &&
+      (n.type === 'addedToCard' || n.type === 'mentionedOnCard' || n.type === 'commentCard') &&
       n.idMemberCreator !== myId &&
       (!cutoff || new Date(n.date) >= cutoff)
   );

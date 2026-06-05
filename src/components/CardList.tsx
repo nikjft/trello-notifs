@@ -121,6 +121,9 @@ export default function CardList({
                   {types.has('mentionedOnCard') && (
                     <span className="text-xs bg-purple-900/60 text-purple-300 px-1.5 py-0.5 rounded">Mentioned</span>
                   )}
+                  {types.has('commentCard') && (
+                    <span className="text-xs bg-blue-900/60 text-blue-300 px-1.5 py-0.5 rounded">Comment</span>
+                  )}
                   <span className="text-gray-400 text-xs">{formatDistanceToNow(latest.date)}</span>
                 </div>
               </div>
